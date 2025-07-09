@@ -1,0 +1,17 @@
+{
+  "name": "url_analyzer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "backend": "cd backend && go run cmd/main.go",
+    "frontend": "cd frontend && npm run dev",
+    "start:all": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
