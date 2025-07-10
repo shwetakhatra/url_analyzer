@@ -1,13 +1,22 @@
 package main
 
 import (
-    "github.com/gin-gonic/gin"
+	"fmt"
+
+	"github.com/shwetakhatra/url-analyzer/controllers"
+	"github.com/shwetakhatra/url-analyzer/database"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
     r := gin.Default()
-    r.GET("/ping", func(c *gin.Context) {
-        c.JSON(200, gin.H{"message": "pong"})
-    })
+    database.Connect()
+
+    fmt.Println("Starting Gin backend...")
+
+    r.POST("/auth/register", controllers.Register)
+    r.POST("/auth/login", controllers.Login)
+
     r.Run(":8080")
 }
