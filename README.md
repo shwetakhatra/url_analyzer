@@ -56,9 +56,9 @@ go mod download
 
 ```bash
 DB_USER=root
-DB_PASSWORD=password
+DB_PASSWORD=root
 DB_HOST=localhost
-DB_NAME=url_analyzer
+DB_NAME=sykell
 JWT_SECRET=your_jwt_secret
 ```
 
