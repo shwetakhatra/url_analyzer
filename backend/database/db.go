@@ -26,7 +26,7 @@ func Connect() {
 		panic(fmt.Sprintf("Failed to connect database: %v", err))
 	}
 
-	db.AutoMigrate(&models.User{}, &models.URL{})
+	db.AutoMigrate(&models.User{}, &models.URL{}, &models.BrokenLink{})
 
 	DB = db
 }

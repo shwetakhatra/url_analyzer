@@ -1,12 +1,13 @@
 package utils
 
 import (
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
-var jwtKey = []byte("your_jwt_secret")
+var jwtKey = []byte(os.Getenv("JWT_SECRET"))
 
 func GenerateJWT(userID uint) (string, error) {
     claims := jwt.MapClaims{
