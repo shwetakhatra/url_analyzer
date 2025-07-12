@@ -25,7 +25,6 @@ type URL struct {
 	HasLoginForm     bool
 	Error          	 string
 	UserID           string       `gorm:"type:char(36);not null"`
-	User             User         `gorm:"foreignKey:UserID;references:ID"`
 	BrokenLinkDetail []BrokenLink `gorm:"foreignKey:URLID"`
 	CreatedAt        time.Time
 	UpdatedAt        time.Time

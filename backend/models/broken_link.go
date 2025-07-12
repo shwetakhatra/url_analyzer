@@ -8,8 +8,8 @@ import (
 )
 
 type BrokenLink struct {
-	ID        string     `gorm:"primaryKey;type:char(36)"`
-	URLID     string     `gorm:"type:char(36);not null"`
+	ID        string     `gorm:"type:char(36);primaryKey" json:"id"`
+	URLID     string     `gorm:"type:char(36);not null" json:"url_id"`
 	URL       URL        `gorm:"foreignKey:URLID;references:ID"`
 	Link      string
 	Status    int

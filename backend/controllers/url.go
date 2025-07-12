@@ -39,7 +39,7 @@ func CreateURL(c *gin.Context) {
 
 
 func GetAllURLs(c *gin.Context) {
-	_, err := utils.GetValidUser(c)
+	user, err := utils.GetValidUser(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("error", err.Error()))
 		return
@@ -51,7 +51,7 @@ func GetAllURLs(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	offset := (page - 1) * limit
 
-	query := database.DB.Model(&models.URL{})
+	query := database.DB.Model(&models.URL{}).Where("user_id = ?", user.ID)
 	if search != "" {
 		query = query.Where("url LIKE ?", "%"+search+"%")
 	}
@@ -59,45 +59,66 @@ func GetAllURLs(c *gin.Context) {
 		query = query.Where("status = ?", status)
 	}
 	if err := query.Offset(offset).Limit(limit).Find(&urls).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "Failed to fetch URLs"))
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "failed to fetch URLs"))
 		return
 	}
 	c.JSON(http.StatusOK, urls)
 }
 
+
 func GetURLByID(c *gin.Context) {
-	_, err := utils.GetValidUser(c)
+	user, err := utils.GetValidUser(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("error", err.Error()))
 		return
 	}
 	id := c.Param("id")
 	var url models.URL
-	if err := database.DB.First(&url, id).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "URL not found"))
+	if err := database.DB.Where("id = ? AND user_id = ?", id, user.ID).First(&url).Error; err != nil {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse("error", "url not found"))
 		return
 	}
 	c.JSON(http.StatusOK, url)
 }
 
+
 func DeleteURLs(c *gin.Context) {
-	_, err := utils.GetValidUser(c)
+	user, err := utils.GetValidUser(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("error", err.Error()))
 		return
 	}
 	var body struct {
-		IDs []uint `json:"ids"`
+		IDs []string `json:"ids"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil || len(body.IDs) == 0 {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse("error", "Invalid or empty ID list"))
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse("error", "invalid or empty ID list"))
 		return
 	}
-	if err := database.DB.Delete(&models.URL{}, body.IDs).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "Failed to delete URLs"))
+	var urls []models.URL
+	if err := database.DB.
+		Where("id IN ? AND user_id = ?", body.IDs, user.ID).
+		Find(&urls).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "failed to fetch URLs"))
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "URLs deleted successfully"})
+	if len(urls) == 0 {
+		c.JSON(http.StatusNotFound, utils.ErrorResponse("error", "no matching URLs found for user"))
+		return
+	}
+	idsToDelete := make([]string, len(urls))
+	for i, url := range urls {
+		idsToDelete[i] = url.ID
+	}
+	if err := database.DB.Where("url_id IN ?", idsToDelete).Delete(&models.BrokenLink{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "failed to delete broken links"))
+		return
+	}
+	if err := database.DB.Delete(&models.URL{}, idsToDelete).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "failed to delete URLs"))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "URLs and related broken links deleted successfully"})
 }
 
 func RequeueURLs(c *gin.Context) {
@@ -107,16 +128,16 @@ func RequeueURLs(c *gin.Context) {
 		return
 	}
 	var body struct {
-		IDs []uint `json:"ids"`
+		IDs []string `json:"ids"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil || len(body.IDs) == 0 {
-		c.JSON(http.StatusBadRequest, utils.ErrorResponse("error", "Invalid or empty ID list"))
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse("error", "invalid or empty ID list"))
 		return
 	}
 	if err := database.DB.Model(&models.URL{}).
 		Where("id IN ?", body.IDs).
 		Update("status", "queued").Error; err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "Failed to requeue URLs"))
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "failed to requeue URLs"))
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "URLs requeued for analysis"})
