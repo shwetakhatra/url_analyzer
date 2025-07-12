@@ -1,7 +1,17 @@
 package models
 
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
+
 type User struct {
-	ID       uint   `gorm:"primaryKey"`
+	ID       string `gorm:"primaryKey;type:char(36)"`
 	Email    string `gorm:"unique"`
 	Password string
+}
+
+func (user *User) BeforeCreate(tx *gorm.DB) (err error) {
+	user.ID = uuid.New().String()
+	return
 }

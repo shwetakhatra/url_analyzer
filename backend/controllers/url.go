@@ -20,11 +20,15 @@ func CreateURL(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.ErrorResponse("error", "Invalid URL format"))
 		return
 	}
-	userID, _ := c.Get("userID")
+	user, err := utils.GetValidUser(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("error", err.Error()))
+		return
+	}
 	url := models.URL{
 		URL:    input.URL,
 		Status: "queued",
-		UserID: userID.(uint),
+		UserID: user.ID,
 	}
 	if err := database.DB.Create(&url).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "Could not save URL"))
@@ -33,7 +37,13 @@ func CreateURL(c *gin.Context) {
 	c.JSON(http.StatusCreated, url)
 }
 
+
 func GetAllURLs(c *gin.Context) {
+	_, err := utils.GetValidUser(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("error", err.Error()))
+		return
+	}
 	var urls []models.URL
 	search := c.Query("search")
 	status := c.Query("status")
@@ -56,6 +66,11 @@ func GetAllURLs(c *gin.Context) {
 }
 
 func GetURLByID(c *gin.Context) {
+	_, err := utils.GetValidUser(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("error", err.Error()))
+		return
+	}
 	id := c.Param("id")
 	var url models.URL
 	if err := database.DB.First(&url, id).Error; err != nil {
@@ -66,6 +81,11 @@ func GetURLByID(c *gin.Context) {
 }
 
 func DeleteURLs(c *gin.Context) {
+	_, err := utils.GetValidUser(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("error", err.Error()))
+		return
+	}
 	var body struct {
 		IDs []uint `json:"ids"`
 	}
@@ -81,6 +101,11 @@ func DeleteURLs(c *gin.Context) {
 }
 
 func RequeueURLs(c *gin.Context) {
+	_, err := utils.GetValidUser(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("error", err.Error()))
+		return
+	}
 	var body struct {
 		IDs []uint `json:"ids"`
 	}
@@ -96,3 +121,4 @@ func RequeueURLs(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "URLs requeued for analysis"})
 }
+

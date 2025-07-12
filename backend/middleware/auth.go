@@ -36,13 +36,13 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		userIDFloat, ok := claims["user_id"].(float64)
+		userIDStr, ok := claims["user_id"].(string)
 		if !ok {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID format"})
 			return
 		}
 
-		c.Set("userID", uint(userIDFloat))
+		c.Set("userID", userIDStr)
 		c.Next()
 	}
 }

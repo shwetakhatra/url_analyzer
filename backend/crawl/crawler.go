@@ -22,7 +22,7 @@ type CrawlResult struct {
 	HasLoginForm    bool
 }
 
-func CrawlURL(rawURL string, urlID uint) (*CrawlResult, error) {
+func CrawlURL(rawURL string, urlID string) (*CrawlResult, error) {
 	resp, err := http.Get(rawURL)
 	if err != nil {
 		return nil, err
