@@ -8,13 +8,13 @@ import (
 )
 
 type BrokenLink struct {
-	ID        string     `gorm:"type:char(36);primaryKey" json:"id"`
-	URLID     string     `gorm:"type:char(36);not null" json:"url_id"`
-	URL       URL        `gorm:"foreignKey:URLID;references:ID"`
-	Link      string
-	Status    int
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        string     `gorm:"type:char(36);primaryKey"`
+	URLID     string     `gorm:"type:char(36);not null" json:"-"`
+	URL       URL        `gorm:"foreignKey:URLID;references:ID" json:"-"`
+	Link      string     `json:"link"`
+	Status    int        `json:"status"`
+	CreatedAt time.Time  `json:"-"`
+	UpdatedAt time.Time  `json:"-"`
 }
 
 func (link *BrokenLink) BeforeCreate(tx *gorm.DB) (err error) {

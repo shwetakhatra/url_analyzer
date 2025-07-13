@@ -8,6 +8,7 @@ import (
 	"github.com/shwetakhatra/url-analyzer/database"
 	"github.com/shwetakhatra/url-analyzer/models"
 	"github.com/shwetakhatra/url-analyzer/utils"
+	"gorm.io/gorm"
 )
 
 type CreateURLRequest struct {
@@ -31,12 +32,11 @@ func CreateURL(c *gin.Context) {
 		UserID: user.ID,
 	}
 	if err := database.DB.Create(&url).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "Could not save URL"))
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "could not save URL"))
 		return
 	}
 	c.JSON(http.StatusCreated, url)
 }
-
 
 func GetAllURLs(c *gin.Context) {
 	user, err := utils.GetValidUser(c)
@@ -51,7 +51,12 @@ func GetAllURLs(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	offset := (page - 1) * limit
 
-	query := database.DB.Model(&models.URL{}).Where("user_id = ?", user.ID)
+	query := database.DB.
+    Model(&models.URL{}).
+    Where("user_id = ?", user.ID).
+    Preload("BrokenLinkDetail", func(db *gorm.DB) *gorm.DB {
+        return db.Select("link", "status", "url_id")
+    })
 	if search != "" {
 		query = query.Where("url LIKE ?", "%"+search+"%")
 	}
@@ -64,7 +69,6 @@ func GetAllURLs(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, urls)
 }
-
 
 func GetURLByID(c *gin.Context) {
 	user, err := utils.GetValidUser(c)
@@ -80,7 +84,6 @@ func GetURLByID(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, url)
 }
-
 
 func DeleteURLs(c *gin.Context) {
 	user, err := utils.GetValidUser(c)

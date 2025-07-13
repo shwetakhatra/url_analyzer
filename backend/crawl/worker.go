@@ -26,6 +26,8 @@ func debugLog(format string, v ...interface{}) {
 }
 
 func StartWorker(ctx context.Context) {
+	ResetStuckURLs()
+	
 	var wg sync.WaitGroup
 	urlCh := make(chan models.URL)
 
