@@ -60,6 +60,6 @@ export async function stopUrlApi(token: string, ids: string | string[]) {
   return axios.put(
     `${API_BASE_URL}/api/urls/stop`,
     { ids: idArray },
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
 }

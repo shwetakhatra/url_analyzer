@@ -82,7 +82,6 @@ export const Header: React.FC = () => {
               <FontAwesomeIcon icon={faSignOutAlt} size="lg" />
             </button>
           )}
-
         </nav>
       </div>
     </header>

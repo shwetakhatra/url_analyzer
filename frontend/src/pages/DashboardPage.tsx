@@ -74,7 +74,8 @@ const DashboardPage: React.FC = () => {
       {
         id: "rowNumber",
         header: "#",
-        cell: ({ row }: RowInfo<UrlRecord>) => pageIndex * pageSize + row.index + 1,
+        cell: ({ row }: RowInfo<UrlRecord>) =>
+          pageIndex * pageSize + row.index + 1,
         size: 50,
         enableSorting: false,
       },
@@ -374,7 +375,9 @@ const DashboardPage: React.FC = () => {
             className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center w-full bg-white rounded-lg shadow p-4"
             aria-label="Crawl new URL"
           >
-            <label htmlFor="url-input" className="sr-only">Enter URL to crawl</label>
+            <label htmlFor="url-input" className="sr-only">
+              Enter URL to crawl
+            </label>
             <input
               id="url-input"
               type="url"
@@ -398,7 +401,9 @@ const DashboardPage: React.FC = () => {
         <section className="w-full">
           <div className="flex flex-col sm:flex-row justify-between mb-2 gap-2 items-stretch sm:items-center">
             <div className="flex gap-2 items-center mb-2 sm:mb-0">
-              <label htmlFor="bulk-action" className="sr-only">Bulk Action</label>
+              <label htmlFor="bulk-action" className="sr-only">
+                Bulk Action
+              </label>
               <select
                 id="bulk-action"
                 className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[140px]"
@@ -414,7 +419,9 @@ const DashboardPage: React.FC = () => {
               </select>
             </div>
             <div className="flex items-center w-full sm:w-auto">
-              <label htmlFor="search-input" className="sr-only">Search URLs</label>
+              <label htmlFor="search-input" className="sr-only">
+                Search URLs
+              </label>
               <input
                 id="search-input"
                 type="text"
@@ -464,9 +471,7 @@ const DashboardPage: React.FC = () => {
               <div className="text-right min-w-[100px]">
                 Page <b>{pageIndex + 1}</b>
                 {totalCount !== undefined ? (
-                  <>
-                    {" "}of {Math.max(1, Math.ceil(totalCount / pageSize))}
-                  </>
+                  <> of {Math.max(1, Math.ceil(totalCount / pageSize))}</>
                 ) : null}
               </div>
             </div>

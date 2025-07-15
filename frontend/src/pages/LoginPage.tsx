@@ -7,6 +7,7 @@ import { loginApi } from "../api/auth";
 import type { LoginFormData, LoginErrorResponse } from "../api/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
 
 const loginFields: Field[] = [
@@ -16,7 +17,11 @@ const loginFields: Field[] = [
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
   const handleSubmit = async (data: Record<string, string>) => {
     const { email, password } = data as LoginFormData;
     try {

@@ -29,30 +29,30 @@ const sampleData = [
 ];
 
 interface SampleColumn {
-    header: string;
-    accessorKey: string;
+  header: string;
+  accessorKey: string;
 }
 
 interface SampleData {
-    id: number;
-    name: string;
-    status: string;
+  id: number;
+  name: string;
+  status: string;
 }
 
 interface DefaultProps {
-    columns: SampleColumn[];
-    data: SampleData[];
-    isLoading: boolean;
-    error: string | null;
-    onRowClick: (row: SampleData) => void;
+  columns: SampleColumn[];
+  data: SampleData[];
+  isLoading: boolean;
+  error: string | null;
+  onRowClick: (row: SampleData) => void;
 }
 
 const defaultProps: DefaultProps = {
-    columns: sampleColumns,
-    data: sampleData,
-    isLoading: false,
-    error: null,
-    onRowClick: (row) => alert(`Row clicked: ${row.id}`),
+  columns: sampleColumns,
+  data: sampleData,
+  isLoading: false,
+  error: null,
+  onRowClick: (row) => alert(`Row clicked: ${row.id}`),
 };
 
 export const Default = () => <Table {...defaultProps} />;

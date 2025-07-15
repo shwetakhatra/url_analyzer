@@ -7,6 +7,7 @@ import type { Field } from "../components/ui/form/Form";
 import { Header } from "../components/layout/Header";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 interface LocalSignupFormData {
   name: string;
@@ -24,6 +25,12 @@ const signupFields: Field[] = [
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (data: Record<string, string>) => {
     const { name, email, password, confirmPassword } =

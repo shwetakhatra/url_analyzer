@@ -9,8 +9,8 @@ export default defineConfig({
   },
   component: {
     devServer: {
-      framework: 'react',
-      bundler: 'vite',
+      framework: "react",
+      bundler: "vite",
     },
   },
 });

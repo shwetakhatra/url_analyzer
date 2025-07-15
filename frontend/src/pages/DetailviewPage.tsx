@@ -77,7 +77,11 @@ const DetailViewPage: React.FC = () => {
                 <h3 className="text-lg font-semibold mb-4">URL Details</h3>
                 <Table
                   data={Object.entries(urlRecord)
-                    .filter(([key]) => key !== "BrokenLinkDetail" && key.toLowerCase() !== "userid")
+                    .filter(
+                      ([key]) =>
+                        key !== "BrokenLinkDetail" &&
+                        key.toLowerCase() !== "userid",
+                    )
                     .map(([key, value]) => {
                       let formattedValue = value;
                       if (
@@ -94,14 +98,18 @@ const DetailViewPage: React.FC = () => {
                       accessorKey: "key",
                       header: "Field",
                       cell: (info) => (
-                        <span className="font-medium text-gray-700">{info.getValue()}</span>
+                        <span className="font-medium text-gray-700">
+                          {info.getValue()}
+                        </span>
                       ),
                     },
                     {
                       accessorKey: "value",
                       header: "Value",
                       cell: (info) => (
-                        <span className="break-all">{String(info.getValue())}</span>
+                        <span className="break-all">
+                          {String(info.getValue())}
+                        </span>
                       ),
                     },
                   ]}
@@ -111,7 +119,10 @@ const DetailViewPage: React.FC = () => {
               </div>
             </div>
             <div className="md:w-1/2 w-full flex flex-col items-center justify-center gap-6">
-              <ChartCard internalLinks={internalLinks} externalLinks={externalLinks} />
+              <ChartCard
+                internalLinks={internalLinks}
+                externalLinks={externalLinks}
+              />
               <div className="bg-gray-50 rounded-xl shadow p-6 w-full min-h-[560px] flex flex-col">
                 <h3 className="text-lg font-semibold mb-4">Broken Links</h3>
                 {loading ? (

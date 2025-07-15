@@ -139,11 +139,20 @@ export function Table<T extends object>({
                       {isSortable && (
                         <span className="ml-1 text-xs">
                           {sorted === "asc" ? (
-                            <i className="fa fa-arrow-up" aria-label="sorted ascending" />
+                            <i
+                              className="fa fa-arrow-up"
+                              aria-label="sorted ascending"
+                            />
                           ) : sorted === "desc" ? (
-                            <i className="fa fa-arrow-down" aria-label="sorted descending" />
+                            <i
+                              className="fa fa-arrow-down"
+                              aria-label="sorted descending"
+                            />
                           ) : (
-                            <i className="fa fa-sort opacity-40" aria-label="sortable" />
+                            <i
+                              className="fa fa-sort opacity-40"
+                              aria-label="sortable"
+                            />
                           )}
                         </span>
                       )}
@@ -204,7 +213,7 @@ export function Table<T extends object>({
         <div className="flex items-center justify-between mt-4">
           <div>
             <Button
-            variant="outline"
+              variant="outline"
               onClick={() =>
                 table.setPageIndex(Math.max(0, pagination!.pageIndex - 1))
               }
@@ -214,7 +223,7 @@ export function Table<T extends object>({
               Prev
             </Button>
             <Button
-            variant="outline"
+              variant="outline"
               onClick={() => table.setPageIndex(pagination!.pageIndex + 1)}
               disabled={
                 totalCount !== undefined

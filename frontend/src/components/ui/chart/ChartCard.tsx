@@ -24,21 +24,18 @@ interface ChartCardProps {
   externalLinks: number;
 }
 
-export const ChartCard: React.FC<ChartCardProps> = ({ internalLinks, externalLinks }) => {
+export const ChartCard: React.FC<ChartCardProps> = ({
+  internalLinks,
+  externalLinks,
+}) => {
   const barData = {
     labels: ["Internal Links", "External Links"],
     datasets: [
       {
         label: "Links",
         data: [internalLinks, externalLinks],
-        backgroundColor: [
-          "rgba(59, 130, 246, 0.7)",
-          "rgba(16, 185, 129, 0.7)",
-        ],
-        borderColor: [
-          "rgba(59, 130, 246, 1)",
-          "rgba(16, 185, 129, 1)",
-        ],
+        backgroundColor: ["rgba(59, 130, 246, 0.7)", "rgba(16, 185, 129, 0.7)"],
+        borderColor: ["rgba(59, 130, 246, 1)", "rgba(16, 185, 129, 1)"],
         borderWidth: 1,
       },
     ],
