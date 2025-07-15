@@ -1,24 +1,7 @@
 import React, { useMemo } from "react";
 import { Header } from "../components/layout/Header";
 import { useNavigate } from "react-router-dom";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+import { ChartCard } from "../components/ui/chart/ChartCard";
 import { useLocation } from "react-router-dom";
 import { Table } from "../components/ui/table/Table";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -34,36 +17,12 @@ const DetailViewPage: React.FC = () => {
   const brokenLinks: BrokenLinkRecord[] =
     (location.state && location.state.brokenLinks) || [];
 
-  // Pagination state for broken links table
   const [pageIndex, setPageIndex] = React.useState<number>(0);
   const totalCount = brokenLinks.length;
   const internalLinks = location.state?.internalLinks ?? 0;
   const externalLinks = location.state?.externalLinks ?? 0;
   console.log("BrokenLinksDetail:", brokenLinks);
   const loading = false;
-  const barData = {
-    labels: ["Internal Links", "External Links"],
-    datasets: [
-      {
-        label: "Links",
-        data: [internalLinks, externalLinks],
-        backgroundColor: ["rgba(59, 130, 246, 0.7)", "rgba(16, 185, 129, 0.7)"],
-        borderColor: ["rgba(59, 130, 246, 1)", "rgba(16, 185, 129, 1)"],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const barOptions = {
-    responsive: true,
-    plugins: {
-      legend: { display: false },
-      title: { display: true, text: "Internal vs. External Links" },
-    },
-    scales: {
-      y: { beginAtZero: true, precision: 0 },
-    },
-  };
 
   const columns = useMemo<ColumnDef<BrokenLinkRecord, any>[]>(
     () => [
@@ -113,9 +72,7 @@ const DetailViewPage: React.FC = () => {
           </div>
           <div className="flex flex-col md:flex-row gap-8">
             <div className="md:w-1/2 w-full flex items-center justify-center">
-              <div className="w-full max-w-md md:max-w-lg bg-gray-50 rounded-xl shadow p-6 h-full min-h-[350px] flex items-center justify-center">
-                <Bar data={barData} options={barOptions} />
-              </div>
+              <ChartCard internalLinks={internalLinks} externalLinks={externalLinks} />
             </div>
             <div className="md:w-1/2 w-full">
               <div className="bg-gray-50 rounded-xl shadow p-6 h-full min-h-[350px] flex flex-col">

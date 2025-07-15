@@ -234,7 +234,6 @@ export function Table<T extends object>({
               </>
             ) : null}
           </div>
-          {/* Removed page size selector, always show 5 entries per page */}
         </div>
       )}
     </div>

@@ -7,7 +7,6 @@ import type { Field } from "../components/ui/form/Form";
 import { Header } from "../components/layout/Header";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { Toast } from "../components/ui/toast/Toast";
 
 interface LocalSignupFormData {
   name: string;
@@ -80,7 +79,6 @@ export const SignupPage: React.FC = () => {
         onSubmit={handleSubmit}
         submitLabel="Sign Up"
       />
-      <Toast />
     </>
   );
 };
