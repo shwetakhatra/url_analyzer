@@ -25,6 +25,8 @@ services:
       DB_PORT: 3306
       DB_NAME: sykell
       JWT_SECRET: your_jwt_secret
+    volumes:
+      - ./backend:/app/backend
 
   frontend:
     build:
@@ -36,6 +38,8 @@ services:
     command: npm run dev -- --host
     environment:
       VITE_API_BASE_URL: http://localhost:8080
+    volumes:
+      - ./frontend:/app/frontend
 
 volumes:
   db_data:

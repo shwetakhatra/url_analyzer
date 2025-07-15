@@ -1,0 +1,78 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 0;
+  background-color: var(--color-bg);
+}
+
+.card {
+  background-color: var(--color-bg-card);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.fieldWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.input {
+  background-color: var(--color-bg-input);
+  border-color: var(--color-border-input);
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 6px;
+  color: var(--color-text-primary);
+  padding: 1rem 0.75rem 0.75rem 0.75rem;
+  font-size: 1rem;
+  outline: none;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.input:focus {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 3px var(--color-focus-shadow);
+}
+
+.label {
+  position: absolute;
+  left: 0.75rem;
+  background-color: var(--color-bg-card);
+  padding: 0 0.25rem;
+  pointer-events: none;
+  transition: all 0.2s ease-out;
+  user-select: none;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  top: 1rem;
+}
+
+.label.filled {
+  top: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--color-focus);
+}

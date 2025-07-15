@@ -13,11 +13,23 @@ import (
 	"github.com/shwetakhatra/url-analyzer/database"
 	"github.com/shwetakhatra/url-analyzer/middleware"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := gin.Default()
+
+	// CORS middleware
+    r.Use(cors.New(cors.Config{
+        AllowOrigins:     []string{"http://localhost:5173"},
+        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+        ExposeHeaders:    []string{"Content-Length"},
+        AllowCredentials: true,
+        MaxAge:           12 * time.Hour,
+    }))
+
     err := r.SetTrustedProxies([]string{"127.0.0.1"})
     if err != nil {
         log.Fatalf("Failed to set trusted proxies: %v", err)

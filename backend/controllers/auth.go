@@ -15,6 +15,7 @@ import (
 
 func Register(c *gin.Context) {
     var body struct {
+        Name     string `json:"name" binding:"required,min=2,max=50"`
         Email    string `json:"email" binding:"required,email"`
         Password string `json:"password" binding:"required,min=6,max=12"`
     }
@@ -23,6 +24,7 @@ func Register(c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"errors": utils.FormatValidationErrors(err)})
         return
     }
+    body.Name = strings.TrimSpace(body.Name)
     body.Email = strings.TrimSpace(strings.ToLower(body.Email)) // Sanitizing input
     body.Password = strings.TrimSpace(body.Password)
     if errorsMap := utils.ValidateStruct(body); errorsMap != nil {
@@ -49,6 +51,7 @@ func Register(c *gin.Context) {
     }
     // Create user
     user := models.User{
+        Name:     body.Name,
         Email:    body.Email,
         Password: string(hashedPassword),
     }
@@ -60,6 +63,7 @@ func Register(c *gin.Context) {
         "message": "User registered successfully",
         "user": gin.H{
             "id":    user.ID,
+            "name":  user.Name,
             "email": user.Email,
         },
     })

@@ -1,0 +1,9 @@
+.tableHeader {
+  background-color: var(--color-primary);
+  color: var(--button-text-color);
+  user-select: none;
+}
+
+.tableHeader th {
+  white-space: nowrap;
+}
