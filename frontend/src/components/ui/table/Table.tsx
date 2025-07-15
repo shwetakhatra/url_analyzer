@@ -69,8 +69,14 @@ export function Table<T extends object>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    ...(enableSorting ? { getSortedRowModel: getSortedRowModel(), onSortingChange: setSorting, state: { sorting } } : {}),
-    ...(enablePagination ? { getPaginationRowModel: getPaginationRowModel(), onPaginationChange: setPagination, state: { pagination } } : {}),
+    getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
+    onSortingChange: enableSorting ? setSorting : undefined,
+    state: {
+      ...(enableSorting ? { sorting } : {}),
+      ...(enablePagination ? { pagination } : {}),
+    },
+    getPaginationRowModel: enablePagination ? getPaginationRowModel() : undefined,
+    onPaginationChange: enablePagination ? setPagination : undefined,
     ...options,
   });
 
@@ -91,19 +97,25 @@ export function Table<T extends object>({
               )}
               {headerGroup.headers.map((header) => {
                 const isSortable = enableSorting && header.column.getCanSort();
+                const sorted = header.column.getIsSorted();
                 return (
                   <th
                     key={header.id}
-                    className={"p-3 text-left font-semibold cursor-pointer select-none" + (isSortable ? " hover:underline" : "")}
+                    className={
+                      "p-3 text-left font-semibold select-none" +
+                      (isSortable ? " cursor-pointer hover:underline" : "")
+                    }
                     style={{ whiteSpace: "nowrap" }}
                     onClick={isSortable ? header.column.getToggleSortingHandler() : undefined}
                   >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                    {isSortable && (
-                      <span className="ml-1">
-                        {header.column.getIsSorted() === "asc" ? "▲" : header.column.getIsSorted() === "desc" ? "▼" : ""}
-                      </span>
-                    )}
+                    <span className="flex items-center gap-1">
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {isSortable && (
+                        <span className="ml-1 text-xs">
+                          {sorted === "asc" ? "▲" : sorted === "desc" ? "▼" : <span className="opacity-40">⇅</span>}
+                        </span>
+                      )}
+                    </span>
                   </th>
                 );
               })}
