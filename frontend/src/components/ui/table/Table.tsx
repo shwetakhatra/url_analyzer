@@ -139,11 +139,11 @@ export function Table<T extends object>({
                       {isSortable && (
                         <span className="ml-1 text-xs">
                           {sorted === "asc" ? (
-                            "▲"
+                            <i className="fa fa-arrow-up" aria-label="sorted ascending" />
                           ) : sorted === "desc" ? (
-                            "▼"
+                            <i className="fa fa-arrow-down" aria-label="sorted descending" />
                           ) : (
-                            <span className="opacity-40">⇅</span>
+                            <i className="fa fa-sort opacity-40" aria-label="sortable" />
                           )}
                         </span>
                       )}

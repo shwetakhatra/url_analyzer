@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
@@ -7,27 +7,6 @@ export const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("theme");
-      if (stored) return stored === "dark";
-      return window.matchMedia("(prefers-color-scheme: dark)").matches;
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (isDark) {
-      root.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDark]);
-
-  const toggleDarkMode = () => setIsDark((prev) => !prev);
   const isDashboardOrDetail =
     location.pathname === "/dashboard" ||
     location.pathname.startsWith("/detail");
@@ -104,19 +83,6 @@ export const Header: React.FC = () => {
             </button>
           )}
 
-          {!["/", "/login", "/signup"].includes(location.pathname) && (
-            <button
-              onClick={toggleDarkMode}
-              aria-label="Toggle dark mode"
-              className="ml-6 p-2 rounded-md transition"
-              style={{
-                backgroundColor: "var(--color-border)",
-                color: "var(--color-text)",
-              }}
-            >
-              {isDark ? "🌙" : "☀️"}
-            </button>
-          )}
         </nav>
       </div>
     </header>

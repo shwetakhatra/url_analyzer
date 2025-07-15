@@ -159,3 +159,25 @@ func RequeueURLs(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "URLs requeued for analysis"})
 }
 
+func StopURLs(c *gin.Context) {
+	_, err := utils.GetValidUser(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.ErrorResponse("error", err.Error()))
+		return
+	}
+	var body struct {
+		IDs []string `json:"ids"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil || len(body.IDs) == 0 {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse("error", "invalid or empty ID list"))
+		return
+	}
+	if err := database.DB.Model(&models.URL{}).
+		Where("id IN ? AND status = ?", body.IDs, "running").
+		Update("status", "stopped").Error; err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "failed to stop URLs"))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Running URLs stopped successfully"})
+}
+

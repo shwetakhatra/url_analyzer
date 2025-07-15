@@ -51,6 +51,7 @@ func main() {
 		auth.GET("/urls/:id", controllers.GetURLByID)
 		auth.DELETE("/urls", controllers.DeleteURLs)
 		auth.PUT("/urls/requeue", controllers.RequeueURLs)
+		auth.PUT("/urls/stop", controllers.StopURLs)
 	}
 
 	go func() {

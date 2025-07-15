@@ -43,9 +43,9 @@ export async function rowActionApi(
     url = `${API_BASE_URL}/api/urls/requeue`;
     method = "put";
   } else if (action === "stop") {
-    url = `${API_BASE_URL}/api/urls/${id}/stop`;
-    method = "post";
-    data = {};
+    url = `${API_BASE_URL}/api/urls/stop`;
+    method = "put";
+    data = { ids: [id] };
   }
   return axios({
     url,
@@ -53,4 +53,13 @@ export async function rowActionApi(
     data,
     headers: { Authorization: `Bearer ${token}` },
   });
+}
+
+export async function stopUrlApi(token: string, ids: string | string[]) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return axios.put(
+    `${API_BASE_URL}/api/urls/stop`,
+    { ids: idArray },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 }

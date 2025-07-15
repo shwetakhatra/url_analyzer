@@ -8,6 +8,7 @@ import {
   bulkDeleteApi,
   rowActionApi,
 } from "../api/dashboard";
+import { stopUrlApi } from "../api/dashboard";
 import { toast } from "react-toastify";
 import { Header } from "../components/layout/Header";
 import { Table } from "../components/ui/table/Table";
@@ -170,7 +171,7 @@ const DashboardPage: React.FC = () => {
           const status = row.original.Status?.toLowerCase();
           return (
             <div className="flex gap-2">
-              <button
+              <Button
                 className="px-2 py-1 text-xs bg-blue-500 text-white rounded disabled:opacity-50"
                 disabled={status === "running"}
                 title="Start/Requeue"
@@ -180,18 +181,25 @@ const DashboardPage: React.FC = () => {
                 }}
               >
                 Start
-              </button>
-              <button
+              </Button>
+              <Button
                 className="px-2 py-1 text-xs bg-yellow-500 text-white rounded disabled:opacity-50"
                 disabled={status !== "running"}
                 title="Stop"
-                onClick={(e: React.MouseEvent) => {
+                onClick={async (e: React.MouseEvent) => {
                   e.stopPropagation();
-                  handleRowAction("stop", row.original.ID);
+                  try {
+                    const token = localStorage.getItem("token") || "";
+                    await stopUrlApi(token, row.original.ID);
+                    toast.success("Stop triggered!");
+                    fetchUrls(pageIndex, pageSize);
+                  } catch (error) {
+                    toast.error("Failed to stop process");
+                  }
                 }}
               >
                 Stop
-              </button>
+              </Button>
             </div>
           );
         },
@@ -315,6 +323,20 @@ const DashboardPage: React.FC = () => {
         }
       };
       startProcessing();
+    } else if (bulkAction === "stop" && selectedIds.length > 0) {
+      const stopProcessing = async () => {
+        try {
+          const token = localStorage.getItem("token") || "";
+          await stopUrlApi(token, selectedIds);
+          toast.success("Stop triggered for selected URLs!");
+          setBulkAction("");
+          fetchUrls();
+        } catch (error) {
+          toast.error("Failed to stop selected URLs");
+          setBulkAction("");
+        }
+      };
+      stopProcessing();
     }
   }, [bulkAction]);
 
@@ -360,14 +382,14 @@ const DashboardPage: React.FC = () => {
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               required
-              className="flex-1 px-4 py-3 text-base rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="flex-1 px-4 py-3 text-base rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
               autoComplete="off"
               aria-required="true"
             />
             <Button
               type="submit"
               aria-label="Crawl URL"
-              className="px-6 py-3 text-base font-semibold bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+              className="px-6 py-3 text-base font-semibold bg-[var(--color-primary)] text-white rounded-md hover:bg-[var(--color-primary-hover)] focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
             >
               Crawl
             </Button>
