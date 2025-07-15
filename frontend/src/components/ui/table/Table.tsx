@@ -49,20 +49,19 @@ export function Table<T extends object>({
   totalCount,
 }: TableProps<T>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [internalPagination, setInternalPagination] = React.useState<PaginationState>({ pageIndex: 0, pageSize: pageSizeOptions[0] });
-  const pagination = controlledPagination || internalPagination;
+  if (enablePagination && (!controlledPagination || !onPaginationChange)) {
+    throw new Error("Table: When enablePagination is true, you must provide both pagination and onPaginationChange props.");
+  }
+
+  const pagination = controlledPagination;
   const setPagination: OnChangeFn<PaginationState> = updaterOrValue => {
     if (onPaginationChange) {
       if (typeof updaterOrValue === "function") {
-        onPaginationChange((updaterOrValue as (old: PaginationState) => PaginationState)(pagination));
+        if (pagination) {
+          onPaginationChange((updaterOrValue as (old: PaginationState) => PaginationState)(pagination));
+        }
       } else {
         onPaginationChange(updaterOrValue);
-      }
-    } else {
-      if (typeof updaterOrValue === "function") {
-        setInternalPagination((updaterOrValue as (old: PaginationState) => PaginationState));
-      } else {
-        setInternalPagination(updaterOrValue);
       }
     }
   };
@@ -151,14 +150,14 @@ export function Table<T extends object>({
       {enablePagination && (
         <div className="flex items-center justify-between mt-4">
           <div>
-            <button onClick={() => table.setPageIndex(0)} disabled={pagination.pageIndex === 0} className="px-2 py-1 mr-2 border rounded disabled:opacity-50">First</button>
-            <button onClick={() => table.setPageIndex(Math.max(0, pagination.pageIndex - 1))} disabled={pagination.pageIndex === 0} className="px-2 py-1 mr-2 border rounded disabled:opacity-50">Prev</button>
+            <button onClick={() => table.setPageIndex(0)} disabled={pagination!.pageIndex === 0} className="px-2 py-1 mr-2 border rounded disabled:opacity-50">First</button>
+            <button onClick={() => table.setPageIndex(Math.max(0, pagination!.pageIndex - 1))} disabled={pagination!.pageIndex === 0} className="px-2 py-1 mr-2 border rounded disabled:opacity-50">Prev</button>
             <button
-              onClick={() => table.setPageIndex(pagination.pageIndex + 1)}
+              onClick={() => table.setPageIndex(pagination!.pageIndex + 1)}
               disabled={
                 totalCount !== undefined
-                  ? (pagination.pageIndex + 1) * pagination.pageSize >= totalCount
-                  : data.length <= pagination.pageSize
+                  ? (pagination!.pageIndex + 1) * pagination!.pageSize >= totalCount
+                  : data.length <= pagination!.pageSize
               }
               className="px-2 py-1 mr-2 border rounded disabled:opacity-50"
             >
@@ -167,13 +166,13 @@ export function Table<T extends object>({
             <button
               onClick={() => table.setPageIndex(
                 totalCount !== undefined
-                  ? Math.max(0, Math.ceil(totalCount / pagination.pageSize) - 1)
+                  ? Math.max(0, Math.ceil(totalCount / pagination!.pageSize) - 1)
                   : table.getPageCount() - 1
               )}
               disabled={
                 totalCount !== undefined
-                  ? (pagination.pageIndex + 1) * pagination.pageSize >= totalCount
-                  : data.length <= pagination.pageSize
+                  ? (pagination!.pageIndex + 1) * pagination!.pageSize >= totalCount
+                  : data.length <= pagination!.pageSize
               }
               className="px-2 py-1 border rounded disabled:opacity-50"
             >
@@ -181,12 +180,12 @@ export function Table<T extends object>({
             </button>
           </div>
           <div>
-            Page <b>{pagination.pageIndex + 1}</b>{totalCount !== undefined ? <> of <b>{Math.max(1, Math.ceil(totalCount / pagination.pageSize))}</b></> : null}
+            Page <b>{pagination!.pageIndex + 1}</b>{totalCount !== undefined ? <> of <b>{Math.max(1, Math.ceil(totalCount / pagination!.pageSize))}</b></> : null}
           </div>
           <div>
             <select
-              value={pagination.pageSize}
-              onChange={e => setPagination({ ...pagination, pageSize: Number(e.target.value), pageIndex: 0 })}
+              value={pagination!.pageSize}
+              onChange={e => setPagination({ ...pagination!, pageSize: Number(e.target.value), pageIndex: 0 })}
               className="border rounded px-2 py-1"
             >
                 {pageSizeOptions.map((size: number) => (

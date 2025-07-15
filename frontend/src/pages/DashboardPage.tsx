@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { Header } from "../components/layout/Header";
 import { Table } from "../components/ui/table/Table";
+import { useNavigate } from "react-router-dom";
 
 type UrlRecord = {
   ID: string;
@@ -20,11 +21,13 @@ const DashboardPage: React.FC = () => {
   const [urls, setUrls] = useState<UrlRecord[]>([]);
   const [urlInput, setUrlInput] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [bulkAction, setBulkAction] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [pageIndex, setPageIndex] = useState(0); // 0-based
   const [pageSize, setPageSize] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
+  const navigate = useNavigate();
 
   interface ColumnDef<T> {
     id?: string;
@@ -99,16 +102,36 @@ const DashboardPage: React.FC = () => {
         header: "Status",
         cell: (info: { getValue: () => string }) => {
           const status = info.getValue().toLowerCase();
-          const style =
-            status === "running"
-              ? "bg-yellow-100 text-yellow-800"
-              : status === "done"
-              ? "bg-green-100 text-green-800"
-              : "bg-gray-100 text-gray-800";
+          let percent = 0;
+          let barColor = "bg-gray-300";
+          let labelColor = "text-gray-800";
+          if (status === "queued") {
+            percent = 0;
+            barColor = "bg-gray-300";
+            labelColor = "text-gray-800";
+          } else if (status === "running") {
+            percent = 70;
+            barColor = "bg-yellow-400 animate-pulse";
+            labelColor = "text-yellow-800";
+          } else if (status === "done") {
+            percent = 100;
+            barColor = "bg-green-500";
+            labelColor = "text-green-800";
+          } else if (status === "error") {
+            percent = 100;
+            barColor = "bg-red-500";
+            labelColor = "text-red-800";
+          }
           return (
-            <span className={`px-2 py-1 rounded text-xs font-medium ${style}`}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </span>
+            <div className="flex flex-col min-w-[100px]">
+              <span className={`text-xs font-medium mb-1 ${labelColor}`}>{status.charAt(0).toUpperCase() + status.slice(1)}</span>
+              <div className="w-full h-2 bg-gray-200 rounded">
+                <div
+                  className={`h-2 rounded transition-all duration-500 ${barColor}`}
+                  style={{ width: `${percent}%` }}
+                ></div>
+              </div>
+            </div>
           );
         },
         enableSorting: true,
@@ -122,6 +145,28 @@ const DashboardPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, pageSize]);
 
+  // Polling for real-time status updates
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      fetchUrls(pageIndex, pageSize);
+    }, 5000); // 5 seconds
+    return () => clearInterval(interval);
+  }, [pageIndex, pageSize]);
+
+  // Fuzzy search filter (frontend only)
+  function fuzzyMatch(str: string, pattern: string) {
+    pattern = pattern.split("").reduce((a, b) => a + ".*" + b);
+    return new RegExp(pattern, "i").test(str);
+  }
+  const filteredUrls = React.useMemo(() => {
+    if (!searchTerm.trim()) return urls;
+    return urls.filter(url =>
+      fuzzyMatch(url.Title || "", searchTerm) ||
+      fuzzyMatch(url.URL || "", searchTerm) ||
+      fuzzyMatch(url.Status || "", searchTerm)
+    );
+  }, [urls, searchTerm]);
+
   const fetchUrls = async (pageIdx = 0, pSize = 5) => {
     try {
       const token = localStorage.getItem("token");
@@ -134,14 +179,8 @@ const DashboardPage: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      // If backend returns total count, set it; else, estimate
-      if (response.data && response.data.urls && typeof response.data.total === "number") {
-        setUrls(response.data.urls);
-        setTotalCount(response.data.total);
-      } else {
-        setUrls(response.data);
-        setTotalCount((pageIdx + 1) * pSize + (response.data.length === pSize ? pSize : 0));
-      }
+      setUrls(response.data.urls || []);
+      setTotalCount(typeof response.data.total === "number" ? response.data.total : 0);
     } catch (error) {
       toast.error("Failed to fetch URLs");
       console.error(error);
@@ -255,21 +294,30 @@ const DashboardPage: React.FC = () => {
           </form>
         </section>
         <section className="w-full">
-          <div className="flex justify-end mb-2">
-            <select
-              className="border rounded px-3 py-2 text-sm"
-              value={bulkAction}
-              onChange={e => setBulkAction(e.target.value)}
-              disabled={selectedIds.length === 0}
-            >
-              <option value="">Bulk Action</option>
-              <option value="start">Start Processing</option>
-              <option value="stop">Stop Processing</option>
-              <option value="delete">Delete</option>
-            </select>
+          <div className="flex justify-between mb-2 gap-2 items-center">
+            <div className="flex gap-2 items-center">
+              <select
+                className="border rounded px-3 py-2 text-sm"
+                value={bulkAction}
+                onChange={e => setBulkAction(e.target.value)}
+                disabled={selectedIds.length === 0}
+              >
+                <option value="">Bulk Action</option>
+                <option value="start">Start Processing</option>
+                <option value="stop">Stop Processing</option>
+                <option value="delete">Delete</option>
+              </select>
+            </div>
+            <input
+              type="text"
+              className="border rounded px-3 py-2 text-sm w-64"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
           </div>
           <Table
-            data={urls}
+            data={filteredUrls}
             columns={columns}
             emptyMessage="No URLs found."
             selectable={true}
@@ -283,8 +331,19 @@ const DashboardPage: React.FC = () => {
             onSelectAll={checked => {
               setSelectedIds(checked ? urls.map(u => u.ID) : []);
             }}
-            getRowProps={() => ({
+            getRowProps={row => ({
               style: { cursor: "pointer" },
+              onClick: (e: React.MouseEvent) => {
+                if ((e.target as HTMLElement).tagName !== "INPUT") {
+                  navigate(`/detail/${row.original.ID}`, {
+                    state: {
+                      brokenLinks: row.original.BrokenLinkDetail || [],
+                      internalLinks: row.original.InternalLinks,
+                      externalLinks: row.original.ExternalLinks,
+                    },
+                  });
+                }
+              },
             })}
             enableSorting={true}
             enablePagination={true}
@@ -295,8 +354,13 @@ const DashboardPage: React.FC = () => {
                 typeof updater === "function"
                   ? updater({ pageIndex, pageSize })
                   : updater;
-              setPageIndex(newPageSize !== pageSize ? 0 : newPageIndex);
-              setPageSize(newPageSize);
+              if (newPageSize !== pageSize) {
+                setPageIndex(0);
+                setPageSize(newPageSize);
+              } else {
+                setPageIndex(newPageIndex);
+                setPageSize(newPageSize);
+              }
             }}
             totalCount={totalCount}
           />

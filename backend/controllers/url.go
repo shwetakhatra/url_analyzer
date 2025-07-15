@@ -52,22 +52,35 @@ func GetAllURLs(c *gin.Context) {
 	offset := (page - 1) * limit
 
 	query := database.DB.
-    Model(&models.URL{}).
-    Where("user_id = ?", user.ID).
-    Preload("BrokenLinkDetail", func(db *gorm.DB) *gorm.DB {
-        return db.Select("link", "status", "url_id")
-    })
+		Model(&models.URL{}).
+		Where("user_id = ?", user.ID).
+		Preload("BrokenLinkDetail", func(db *gorm.DB) *gorm.DB {
+			return db.Select("link", "status", "url_id")
+		})
 	if search != "" {
 		query = query.Where("url LIKE ?", "%"+search+"%")
 	}
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
+
+	// Count total matching records (without pagination)
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "failed to count URLs"))
+		return
+	}
+
+	// Fetch paginated results
 	if err := query.Offset(offset).Limit(limit).Find(&urls).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("error", "failed to fetch URLs"))
 		return
 	}
-	c.JSON(http.StatusOK, urls)
+
+	c.JSON(http.StatusOK, gin.H{
+		"urls": urls,
+		"total": total,
+	})
 }
 
 func GetURLByID(c *gin.Context) {
