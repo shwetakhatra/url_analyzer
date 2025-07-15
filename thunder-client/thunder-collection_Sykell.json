@@ -1,0 +1,187 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "Sykell",
+    "collectionId": "f61e4c4f-050c-4cbb-b26d-9d882b019a99",
+    "dateExported": "2025-07-15T21:19:18.061Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "38ed45ef-a77d-4a70-b737-6bc80acadde7",
+            "colId": "f61e4c4f-050c-4cbb-b26d-9d882b019a99",
+            "containerId": "",
+            "name": "register",
+            "url": "http://localhost:8080/auth/register",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2025-07-10T10:13:30.082Z",
+            "modified": "2025-07-15T19:27:54.017Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\"email\":\"testuser1@example.com\",\"password\":\"Test@419Pass\",\"name\":\"Test User\"}\r\n",
+                "form": []
+            }
+        },
+        {
+            "_id": "29a72f7a-fae2-4a8c-8f99-fd237bc3fd7d",
+            "colId": "f61e4c4f-050c-4cbb-b26d-9d882b019a99",
+            "containerId": "",
+            "name": "login",
+            "url": "http://localhost:8080/auth/login",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2025-07-10T11:12:33.548Z",
+            "modified": "2025-07-15T15:27:42.356Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"hwetakhatra@gmail.com\",\n  \"password\": \"\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "5cea72ff-fd43-4f8f-b48a-14ec7c5099dd",
+            "colId": "f61e4c4f-050c-4cbb-b26d-9d882b019a99",
+            "containerId": "",
+            "name": "get_all_urls",
+            "url": "http://localhost:8080/api/urls",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2025-07-11T10:30:15.893Z",
+            "modified": "2025-07-13T09:30:09.299Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI0ODUzOTEsInVzZXJfaWQiOiJlNjk1OTQzMy05ZTI1LTRlMjItYjQzMS02ZGU5MzE5NTc4OGEifQ.OlvvomlDWcM26XaCL-ZzY8TpB517WZLUmBzQuSq87-s"
+                }
+            ],
+            "params": [
+                {
+                    "name": "search",
+                    "value": "",
+                    "isDisabled": true,
+                    "isPath": false
+                },
+                {
+                    "name": "page",
+                    "value": "1",
+                    "isDisabled": true,
+                    "isPath": false
+                },
+                {
+                    "name": "limit",
+                    "value": "1",
+                    "isDisabled": true,
+                    "isPath": false
+                }
+            ]
+        },
+        {
+            "_id": "71f8e162-d1eb-4b70-ae6f-8799ec09c709",
+            "colId": "f61e4c4f-050c-4cbb-b26d-9d882b019a99",
+            "containerId": "",
+            "name": "url_details",
+            "url": "http://localhost:8080/api/urls/56e21865-97d3-4b18-b3f8-af8793400e11",
+            "method": "GET",
+            "sortNum": 40000,
+            "created": "2025-07-11T10:49:10.941Z",
+            "modified": "2025-07-12T12:31:31.840Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI0MDk1MjAsInVzZXJfaWQiOiJlNjFlMTU5Zi0wZGM1LTQ4MTMtOTgzNC1hNzYxZTU1M2QwMmUifQ.7UZ0PbXI8HzW_1Z2Apd_HEdc4FKaUxv-40E0B0aggoQ"
+                }
+            ]
+        },
+        {
+            "_id": "9f7236a5-34c4-41ee-9250-48aed3fae6ba",
+            "colId": "f61e4c4f-050c-4cbb-b26d-9d882b019a99",
+            "containerId": "",
+            "name": "create_url",
+            "url": "http://localhost:8080/api/urls",
+            "method": "POST",
+            "sortNum": 40000,
+            "created": "2025-07-11T10:49:36.466Z",
+            "modified": "2025-07-14T12:51:02.340Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI1ODE1MzgsInVzZXJfaWQiOiIwNGUwNGY5Yi05NTFlLTQ1YzQtOWUzMC04ZDI2YzMyNTk3ZGIifQ.hLg4CQvpwCYHtTpyQX2AAcaB6ByxDFeUhDZV95P_LAI"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"url\": \"https://medium.com/@webtechnologytutorials24/fixing-npx-tailwindcss-init-error-could-not-determine-executable-to-run-step-by-step-guide-01292b30e6d3\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "05d72e8c-62b1-4162-ba96-a82d49b9bf17",
+            "colId": "f61e4c4f-050c-4cbb-b26d-9d882b019a99",
+            "containerId": "",
+            "name": "delete_urls",
+            "url": "http://localhost:8080/api/urls",
+            "method": "DELETE",
+            "sortNum": 50000,
+            "created": "2025-07-11T10:56:45.712Z",
+            "modified": "2025-07-12T13:14:56.223Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI0MDk1MjAsInVzZXJfaWQiOiJlNjFlMTU5Zi0wZGM1LTQ4MTMtOTgzNC1hNzYxZTU1M2QwMmUifQ.7UZ0PbXI8HzW_1Z2Apd_HEdc4FKaUxv-40E0B0aggoQ"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"ids\": [\"56e21865-97d3-4b18-b3f8-af8793400e11\"]\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "46dae89b-6653-4ae2-bd5e-bd804ff32303",
+            "colId": "f61e4c4f-050c-4cbb-b26d-9d882b019a99",
+            "containerId": "",
+            "name": "requeue_urls",
+            "url": "http://localhost:8080/api/urls/requeue",
+            "method": "PUT",
+            "sortNum": 50000,
+            "created": "2025-07-11T11:03:34.008Z",
+            "modified": "2025-07-12T13:34:29.623Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI0MDk1MjAsInVzZXJfaWQiOiJlNjFlMTU5Zi0wZGM1LTQ4MTMtOTgzNC1hNzYxZTU1M2QwMmUifQ.7UZ0PbXI8HzW_1Z2Apd_HEdc4FKaUxv-40E0B0aggoQ"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"ids\": [\"6faf58da-f377-4c8c-bd26-8fab1c8165d0\"]\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "6127157a-0eb7-44c0-acb8-a2908fb04842",
+            "colId": "f61e4c4f-050c-4cbb-b26d-9d882b019a99",
+            "containerId": "",
+            "name": "stop_url",
+            "url": "http://localhost:8080/api/urls/stop",
+            "method": "PUT",
+            "sortNum": 60000,
+            "created": "2025-07-15T20:35:35.865Z",
+            "modified": "2025-07-15T20:35:57.495Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTI0MDk1MjAsInVzZXJfaWQiOiJlNjFlMTU5Zi0wZGM1LTQ4MTMtOTgzNC1hNzYxZTU1M2QwMmUifQ.7UZ0PbXI8HzW_1Z2Apd_HEdc4FKaUxv-40E0B0aggoQ"
+                }
+            ],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"ids\": [\"6faf58da-f377-4c8c-bd26-8fab1c8165d0\"]\n}",
+                "form": []
+            }
+        }
+    ],
+    "ref": "kcEtfXoUwyLrckCT2R_hdiAzKwzwDkzcPSKN8h-pgOOLBWWD9qFnLSGb2gyR7r1FvPd9PKJyMdfdvbD0T6RlTQ"
+}

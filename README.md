@@ -73,6 +73,40 @@ Frontend runs on http://localhost:5173
 
 Backend runs on http://localhost:8080
 
+## Docker Setup
+
+You can also run both the frontend and backend using Docker and docker-compose for a seamless local development experience.
+
+### 1. Build and Start All Services
+
+From the root folder, run:
+
+```bash
+docker-compose up --build
+```
+
+This will build and start the backend (Go), frontend (React), and a MySQL database container.
+
+### 2. Stopping the Services
+
+To stop all running containers:
+
+```bash
+docker-compose down
+```
+
+### 3. Accessing the Application
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8080
+- MySQL: localhost:3306 (see `docker-compose.yml` for credentials)
+
+### 4. Environment Variables
+
+You can configure environment variables for the backend in the `backend/.env` file or directly in `docker-compose.yml`.
+
+---
+
 
 ## Available Scripts
 ### Frontend
