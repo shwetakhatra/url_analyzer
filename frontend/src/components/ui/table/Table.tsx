@@ -14,6 +14,7 @@ import type {
   OnChangeFn,
 } from "@tanstack/react-table";
 import styles from "./Table.module.css";
+import { Button } from "../button/Button";
 
 type TableProps<T extends object> = {
   data: T[];
@@ -109,6 +110,7 @@ export function Table<T extends object>({
                     onChange={(e) =>
                       onSelectAll && onSelectAll(e.target.checked)
                     }
+                    className="w-5 h-5 accent-purple-800"
                   />
                 </th>
               )}
@@ -184,6 +186,7 @@ export function Table<T extends object>({
                         )
                       }
                       onClick={(e) => e.stopPropagation()}
+                      className="w-5 h-5 accent-blue-500"
                     />
                   </td>
                 )}
@@ -200,7 +203,8 @@ export function Table<T extends object>({
       {enablePagination && (
         <div className="flex items-center justify-between mt-4">
           <div>
-            <button
+            <Button
+            variant="outline"
               onClick={() =>
                 table.setPageIndex(Math.max(0, pagination!.pageIndex - 1))
               }
@@ -208,8 +212,9 @@ export function Table<T extends object>({
               className="px-2 py-1 mr-2 border rounded disabled:opacity-50"
             >
               Prev
-            </button>
-            <button
+            </Button>
+            <Button
+            variant="outline"
               onClick={() => table.setPageIndex(pagination!.pageIndex + 1)}
               disabled={
                 totalCount !== undefined
@@ -220,7 +225,7 @@ export function Table<T extends object>({
               className="px-2 py-1 border rounded disabled:opacity-50"
             >
               Next
-            </button>
+            </Button>
           </div>
           <div>
             Page <b>{pagination!.pageIndex + 1}</b>

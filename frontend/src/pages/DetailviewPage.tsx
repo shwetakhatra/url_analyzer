@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ChartCard } from "../components/ui/chart/ChartCard";
 import { useLocation } from "react-router-dom";
 import { Table } from "../components/ui/table/Table";
+import { Button } from "../components/ui/button/Button";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface BrokenLinkRecord {
@@ -60,14 +61,15 @@ const DetailViewPage: React.FC = () => {
       <div className="max-w-6xl mx-auto min-h-screen flex items-start mt-6 p-4 sm:p-6">
         <div className="bg-white rounded-xl shadow p-6 w-full flex flex-col">
           <div className="flex items-center mb-6">
-            <button
-              className="text-gray-600 hover:text-blue-600 focus:outline-none mr-4 flex items-center gap-2"
+            <Button
+              variant="outline"
+              className="mr-4 flex items-center gap-2"
               onClick={() => navigate(-1)}
               aria-label="Back"
             >
               <i className="fa fa-arrow-left text-xl" aria-hidden="true"></i>
               <span className="font-medium text-base">Back</span>
-            </button>
+            </Button>
           </div>
           <div className="flex flex-col md:flex-row gap-8">
             <div className="md:w-1/2 w-full flex flex-col items-stretch justify-center gap-6">

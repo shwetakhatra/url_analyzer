@@ -1,5 +1,6 @@
 import ConfirmModal from "../components/ui/modal/ConfirmModal";
 import React, { useState, useEffect } from "react";
+import { Button } from "../components/ui/button/Button";
 import {
   fetchUrlsApi,
   submitUrlApi,
@@ -363,13 +364,13 @@ const DashboardPage: React.FC = () => {
               autoComplete="off"
               aria-required="true"
             />
-            <button
+            <Button
               type="submit"
-              className="px-6 py-3 text-base font-semibold bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
               aria-label="Crawl URL"
+              className="px-6 py-3 text-base font-semibold bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
             >
               Crawl
-            </button>
+            </Button>
           </form>
         </section>
         <section className="w-full">
@@ -420,20 +421,22 @@ const DashboardPage: React.FC = () => {
             />
             <div className="flex items-center justify-between mt-4">
               <div>
-                <button
+                <Button
+                  variant="outline"
                   onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}
                   disabled={pageIndex === 0}
                   className="px-2 py-1 mr-2 border rounded disabled:opacity-50"
                 >
                   Prev
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={() => setPageIndex(pageIndex + 1)}
                   disabled={(pageIndex + 1) * pageSize >= totalCount}
                   className="px-2 py-1 border rounded disabled:opacity-50"
                 >
                   Next
-                </button>
+                </Button>
               </div>
               <div className="flex-1"></div>
               <div className="text-right min-w-[100px]">
