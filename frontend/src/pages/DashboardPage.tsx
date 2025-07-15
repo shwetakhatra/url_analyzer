@@ -222,6 +222,7 @@ const DashboardPage: React.FC = () => {
     [],
   );
 
+  // Fuzzy search should apply to all records, not just the current page
   const filteredUrls = React.useMemo<UrlRecord[]>(() => {
     if (!searchTerm.trim()) return urls;
     return urls.filter(
@@ -254,9 +255,7 @@ const DashboardPage: React.FC = () => {
         if ((e.target as HTMLElement).tagName !== "INPUT") {
           navigate(`/detail/${row.original.ID}`, {
             state: {
-              brokenLinks: (row.original as any).BrokenLinkDetail || [],
-              internalLinks: row.original.InternalLinks,
-              externalLinks: row.original.ExternalLinks,
+              urlRecord: row.original,
             },
           });
         }
@@ -345,8 +344,7 @@ const DashboardPage: React.FC = () => {
         }}
         count={selectedIds.length}
       />
-      <main className="mt-6 px-2 sm:px-4 md:px-8 max-w-7xl mx-auto flex flex-col gap-6 items-center w-full">
-        {/* URL Submission Form */}
+      <main className="mt-6 px-2 sm:px-4 md:px-8 max-w-6xl mx-auto flex flex-col gap-6 items-center w-full">
         <section className="w-full">
           <form
             onSubmit={handleSubmit}
@@ -374,7 +372,6 @@ const DashboardPage: React.FC = () => {
             </button>
           </form>
         </section>
-        {/* Table Controls and Table */}
         <section className="w-full">
           <div className="flex flex-col sm:flex-row justify-between mb-2 gap-2 items-stretch sm:items-center">
             <div className="flex gap-2 items-center mb-2 sm:mb-0">
@@ -388,8 +385,8 @@ const DashboardPage: React.FC = () => {
                 aria-label="Bulk Action"
               >
                 <option value="">Bulk Action</option>
-                <option value="start">Start Processing</option>
-                <option value="stop">Stop Processing</option>
+                <option value="start">Start</option>
+                <option value="stop">Stop</option>
                 <option value="delete">Delete</option>
               </select>
             </div>
@@ -419,9 +416,8 @@ const DashboardPage: React.FC = () => {
               onSelectAll={handleSelectAll}
               getRowProps={getRowProps}
               enableSorting={true}
-              enablePagination={false}
+              enablePagination={searchTerm.trim() ? false : false}
             />
-            {/* Custom server-side pagination controls */}
             <div className="flex items-center justify-between mt-4">
               <div>
                 <button

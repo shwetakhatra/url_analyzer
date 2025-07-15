@@ -6,6 +6,7 @@ import { LoginPage } from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import { ProtectedRoute } from "./components/routes/ProtectedRoute";
 import { DetailViewPage } from "./pages/DetailviewPage";
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 function App() {
   return (
