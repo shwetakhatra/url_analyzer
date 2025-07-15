@@ -1,6 +1,12 @@
 import ConfirmModal from "../components/ui/modal/ConfirmModal";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import {
+  fetchUrlsApi,
+  submitUrlApi,
+  bulkStartApi,
+  bulkDeleteApi,
+  rowActionApi,
+} from "../api/dashboard";
 import { toast } from "react-toastify";
 import { Header } from "../components/layout/Header";
 import { Table } from "../components/ui/table/Table";
@@ -19,14 +25,14 @@ type UrlRecord = {
 
 const DashboardPage: React.FC = () => {
   const [urls, setUrls] = useState<UrlRecord[]>([]);
-  const [urlInput, setUrlInput] = useState("");
+  const [urlInput, setUrlInput] = useState<string>("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [bulkAction, setBulkAction] = useState("");
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [pageIndex, setPageIndex] = useState(0); // 0-based
-  const [pageSize, setPageSize] = useState(5);
-  const [totalCount, setTotalCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [bulkAction, setBulkAction] = useState<string>("");
+  const [showConfirm, setShowConfirm] = useState<boolean>(false);
+  const [pageIndex, setPageIndex] = useState<number>(0);
+  const [pageSize] = useState<number>(5);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const navigate = useNavigate();
 
   interface ColumnDef<T> {
@@ -43,12 +49,30 @@ const DashboardPage: React.FC = () => {
     getValue: () => T[keyof T];
   }
 
+  // Row action handler (start/stop/requeue)
+  const handleRowAction = React.useCallback(
+    async (action: "start" | "stop" | "requeue", id: string) => {
+      try {
+        const token = localStorage.getItem("token") || "";
+        await rowActionApi(token, action, id);
+        toast.success(
+          `${action.charAt(0).toUpperCase() + action.slice(1)} triggered!`,
+        );
+        fetchUrls(pageIndex, pageSize);
+      } catch (error) {
+        toast.error(`Failed to ${action} process`);
+      }
+    },
+    [pageIndex, pageSize],
+  );
+
+  // Table columns definition
   const columns: ColumnDef<UrlRecord>[] = React.useMemo(
     () => [
       {
         id: "rowNumber",
         header: "#",
-        cell: ({ row }: RowInfo<UrlRecord>) => row.index + 1,
+        cell: ({ row }: RowInfo<UrlRecord>) => pageIndex * pageSize + row.index + 1,
         size: 50,
         enableSorting: false,
       },
@@ -124,7 +148,9 @@ const DashboardPage: React.FC = () => {
           }
           return (
             <div className="flex flex-col min-w-[100px]">
-              <span className={`text-xs font-medium mb-1 ${labelColor}`}>{status.charAt(0).toUpperCase() + status.slice(1)}</span>
+              <span className={`text-xs font-medium mb-1 ${labelColor}`}>
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </span>
               <div className="w-full h-2 bg-gray-200 rounded">
                 <div
                   className={`h-2 rounded transition-all duration-500 ${barColor}`}
@@ -136,51 +162,117 @@ const DashboardPage: React.FC = () => {
         },
         enableSorting: true,
       },
+      {
+        id: "actions",
+        header: "Action",
+        cell: ({ row }: { row: { original: UrlRecord } }) => {
+          const status = row.original.Status?.toLowerCase();
+          return (
+            <div className="flex gap-2">
+              <button
+                className="px-2 py-1 text-xs bg-blue-500 text-white rounded disabled:opacity-50"
+                disabled={status === "running"}
+                title="Start/Requeue"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  handleRowAction("start", row.original.ID);
+                }}
+              >
+                Start
+              </button>
+              <button
+                className="px-2 py-1 text-xs bg-yellow-500 text-white rounded disabled:opacity-50"
+                disabled={status !== "running"}
+                title="Stop"
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  handleRowAction("stop", row.original.ID);
+                }}
+              >
+                Stop
+              </button>
+            </div>
+          );
+        },
+        enableSorting: false,
+        size: 120,
+      },
     ],
-    []
+    [pageIndex, pageSize],
   );
 
   useEffect(() => {
     fetchUrls(pageIndex, pageSize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageIndex, pageSize]);
 
-  // Polling for real-time status updates
-  React.useEffect(() => {
+  // Auto-refresh every 5 seconds
+  useEffect(() => {
     const interval = setInterval(() => {
       fetchUrls(pageIndex, pageSize);
-    }, 5000); // 5 seconds
+    }, 5000);
     return () => clearInterval(interval);
   }, [pageIndex, pageSize]);
 
-  // Fuzzy search filter (frontend only)
-  function fuzzyMatch(str: string, pattern: string) {
-    pattern = pattern.split("").reduce((a, b) => a + ".*" + b);
-    return new RegExp(pattern, "i").test(str);
-  }
-  const filteredUrls = React.useMemo(() => {
+  // Fuzzy search filter
+  const fuzzyMatch = React.useCallback(
+    (str: string, pattern: string): boolean => {
+      pattern = pattern.split("").reduce((a, b) => a + ".*" + b);
+      return new RegExp(pattern, "i").test(str);
+    },
+    [],
+  );
+
+  const filteredUrls = React.useMemo<UrlRecord[]>(() => {
     if (!searchTerm.trim()) return urls;
-    return urls.filter(url =>
-      fuzzyMatch(url.Title || "", searchTerm) ||
-      fuzzyMatch(url.URL || "", searchTerm) ||
-      fuzzyMatch(url.Status || "", searchTerm)
+    return urls.filter(
+      (url) =>
+        fuzzyMatch(url.Title || "", searchTerm) ||
+        fuzzyMatch(url.URL || "", searchTerm) ||
+        fuzzyMatch(url.Status || "", searchTerm),
     );
-  }, [urls, searchTerm]);
+  }, [urls, searchTerm, fuzzyMatch]);
+
+  // Row selection handlers
+  const handleSelectRow = React.useCallback((id: string, checked: boolean) => {
+    setSelectedIds((prev) =>
+      checked ? [...prev, id] : prev.filter((x) => x !== id),
+    );
+  }, []);
+
+  const handleSelectAll = React.useCallback(
+    (checked: boolean) => {
+      setSelectedIds(checked ? urls.map((u) => u.ID) : []);
+    },
+    [urls],
+  );
+
+  // Row click handler for navigation
+  const getRowProps = React.useCallback(
+    (row: { original: UrlRecord }) => ({
+      style: { cursor: "pointer" },
+      onClick: (e: React.MouseEvent) => {
+        if ((e.target as HTMLElement).tagName !== "INPUT") {
+          navigate(`/detail/${row.original.ID}`, {
+            state: {
+              brokenLinks: (row.original as any).BrokenLinkDetail || [],
+              internalLinks: row.original.InternalLinks,
+              externalLinks: row.original.ExternalLinks,
+            },
+          });
+        }
+      },
+    }),
+    [navigate],
+  );
 
   const fetchUrls = async (pageIdx = 0, pSize = 5) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:8080/api/urls", {
-        params: {
-          page: pageIdx + 1, // backend expects 1-based
-          limit: pSize,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const token = localStorage.getItem("token") || "";
+      const response = await fetchUrlsApi(token, pageIdx + 1, pSize);
       setUrls(response.data.urls || []);
-      setTotalCount(typeof response.data.total === "number" ? response.data.total : 0);
+      setTotalCount(
+        typeof response.data.total === "number" ? response.data.total : 0,
+      );
     } catch (error) {
       toast.error("Failed to fetch URLs");
       console.error(error);
@@ -193,18 +285,9 @@ const DashboardPage: React.FC = () => {
       toast.error("Please enter a valid URL");
       return;
     }
-
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:8080/api/urls",
-        { url: urlInput },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      const token = localStorage.getItem("token") || "";
+      await submitUrlApi(token, urlInput);
       toast.success("URL submitted successfully!");
       setUrlInput("");
       fetchUrls();
@@ -219,15 +302,10 @@ const DashboardPage: React.FC = () => {
     if (bulkAction === "delete" && selectedIds.length > 0) {
       setShowConfirm(true);
     } else if (bulkAction === "start" && selectedIds.length > 0) {
-      // Bulk start processing
       const startProcessing = async () => {
         try {
-          const token = localStorage.getItem("token");
-          await axios.put(
-            "http://localhost:8080/api/urls/requeue",
-            { ids: selectedIds },
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+          const token = localStorage.getItem("token") || "";
+          await bulkStartApi(token, selectedIds);
           toast.success("Start processing triggered for selected URLs!");
           setBulkAction("");
           fetchUrls();
@@ -238,17 +316,13 @@ const DashboardPage: React.FC = () => {
       };
       startProcessing();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bulkAction]);
 
   const handleDeleteConfirm = async () => {
     setShowConfirm(false);
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete("http://localhost:8080/api/urls", {
-        data: { ids: selectedIds },
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const token = localStorage.getItem("token") || "";
+      await bulkDeleteApi(token, selectedIds);
       toast.success("Selected URLs deleted successfully!");
       setSelectedIds([]);
       setBulkAction("");
@@ -271,36 +345,47 @@ const DashboardPage: React.FC = () => {
         }}
         count={selectedIds.length}
       />
-      <main className="mt-8 px-8 max-w-6xl mx-auto flex flex-col gap-8 items-center w-full">
+      <main className="mt-6 px-2 sm:px-4 md:px-8 max-w-7xl mx-auto flex flex-col gap-6 items-center w-full">
+        {/* URL Submission Form */}
         <section className="w-full">
           <form
             onSubmit={handleSubmit}
-            className="flex gap-4 items-center w-full"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center w-full bg-white rounded-lg shadow p-4"
+            aria-label="Crawl new URL"
           >
+            <label htmlFor="url-input" className="sr-only">Enter URL to crawl</label>
             <input
+              id="url-input"
               type="url"
               placeholder="Enter URL to crawl"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
               required
-              className="flex-1 px-4 py-3 text-base rounded-md border border-gray-300"
+              className="flex-1 px-4 py-3 text-base rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              autoComplete="off"
+              aria-required="true"
             />
             <button
               type="submit"
-              className="px-6 py-3 text-base bg-[var(--color-primary)] text-white rounded-md hover:bg-[var(--color-primary-hover)] transition-colors"
+              className="px-6 py-3 text-base font-semibold bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+              aria-label="Crawl URL"
             >
               Crawl
             </button>
           </form>
         </section>
+        {/* Table Controls and Table */}
         <section className="w-full">
-          <div className="flex justify-between mb-2 gap-2 items-center">
-            <div className="flex gap-2 items-center">
+          <div className="flex flex-col sm:flex-row justify-between mb-2 gap-2 items-stretch sm:items-center">
+            <div className="flex gap-2 items-center mb-2 sm:mb-0">
+              <label htmlFor="bulk-action" className="sr-only">Bulk Action</label>
               <select
-                className="border rounded px-3 py-2 text-sm"
+                id="bulk-action"
+                className="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-[140px]"
                 value={bulkAction}
-                onChange={e => setBulkAction(e.target.value)}
+                onChange={(e) => setBulkAction(e.target.value)}
                 disabled={selectedIds.length === 0}
+                aria-label="Bulk Action"
               >
                 <option value="">Bulk Action</option>
                 <option value="start">Start Processing</option>
@@ -308,62 +393,63 @@ const DashboardPage: React.FC = () => {
                 <option value="delete">Delete</option>
               </select>
             </div>
-            <input
-              type="text"
-              className="border rounded px-3 py-2 text-sm w-64"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
+            <div className="flex items-center w-full sm:w-auto">
+              <label htmlFor="search-input" className="sr-only">Search URLs</label>
+              <input
+                id="search-input"
+                type="text"
+                className="border rounded px-3 py-2 text-sm w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Search URLs"
+                autoComplete="off"
+              />
+            </div>
           </div>
-          <Table
-            data={filteredUrls}
-            columns={columns}
-            emptyMessage="No URLs found."
-            selectable={true}
-            selectedRowIds={selectedIds}
-            rowIdAccessor={row => row.ID}
-            onSelectRow={(id, checked) => {
-              setSelectedIds(prev =>
-                checked ? [...prev, id] : prev.filter(x => x !== id)
-              );
-            }}
-            onSelectAll={checked => {
-              setSelectedIds(checked ? urls.map(u => u.ID) : []);
-            }}
-            getRowProps={row => ({
-              style: { cursor: "pointer" },
-              onClick: (e: React.MouseEvent) => {
-                if ((e.target as HTMLElement).tagName !== "INPUT") {
-                  navigate(`/detail/${row.original.ID}`, {
-                    state: {
-                      brokenLinks: row.original.BrokenLinkDetail || [],
-                      internalLinks: row.original.InternalLinks,
-                      externalLinks: row.original.ExternalLinks,
-                    },
-                  });
-                }
-              },
-            })}
-            enableSorting={true}
-            enablePagination={true}
-            pageSizeOptions={[5, 10, 20, 50]}
-            pagination={{ pageIndex, pageSize }}
-            onPaginationChange={(updater) => {
-              const { pageIndex: newPageIndex, pageSize: newPageSize } =
-                typeof updater === "function"
-                  ? updater({ pageIndex, pageSize })
-                  : updater;
-              if (newPageSize !== pageSize) {
-                setPageIndex(0);
-                setPageSize(newPageSize);
-              } else {
-                setPageIndex(newPageIndex);
-                setPageSize(newPageSize);
-              }
-            }}
-            totalCount={totalCount}
-          />
+          <div className="bg-white rounded-lg shadow p-2 sm:p-4 overflow-x-auto mb-4">
+            <Table
+              data={filteredUrls}
+              columns={columns}
+              emptyMessage="No URLs found."
+              selectable={true}
+              selectedRowIds={selectedIds}
+              rowIdAccessor={(row) => row.ID}
+              onSelectRow={handleSelectRow}
+              onSelectAll={handleSelectAll}
+              getRowProps={getRowProps}
+              enableSorting={true}
+              enablePagination={false}
+            />
+            {/* Custom server-side pagination controls */}
+            <div className="flex items-center justify-between mt-4">
+              <div>
+                <button
+                  onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}
+                  disabled={pageIndex === 0}
+                  className="px-2 py-1 mr-2 border rounded disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() => setPageIndex(pageIndex + 1)}
+                  disabled={(pageIndex + 1) * pageSize >= totalCount}
+                  className="px-2 py-1 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+              <div className="flex-1"></div>
+              <div className="text-right min-w-[100px]">
+                Page <b>{pageIndex + 1}</b>
+                {totalCount !== undefined ? (
+                  <>
+                    {" "}of {Math.max(1, Math.ceil(totalCount / pageSize))}
+                  </>
+                ) : null}
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </>

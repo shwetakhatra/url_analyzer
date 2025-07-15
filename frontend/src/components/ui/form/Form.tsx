@@ -7,7 +7,6 @@ export type Field = {
   label: string;
   type: string;
   placeholder?: string;
-  required?: boolean;
 };
 
 type FormProps = {
@@ -41,7 +40,7 @@ export const Form: React.FC<FormProps> = ({
       <div className={styles.card}>
         <h2 className={styles.title}>{title}</h2>
         <form onSubmit={handleSubmit} className={styles.form}>
-          {fields.map(({ name, label, type, required }) => {
+          {fields.map(({ name, label, type }) => {
             const hasValue = formData[name].length > 0;
             return (
               <div key={name} className={styles.fieldWrapper}>
@@ -49,7 +48,6 @@ export const Form: React.FC<FormProps> = ({
                   id={name}
                   name={name}
                   type={type}
-                  required={required}
                   value={formData[name]}
                   onChange={handleChange}
                   placeholder=" "

@@ -1,5 +1,7 @@
 import React from "react";
-import axios, { AxiosError } from "axios";
+import type { AxiosError } from "axios";
+import { signupApi } from "../api/signup";
+import type { SignupErrorResponse } from "../api/signup";
 import { Form } from "../components/ui/form/Form";
 import type { Field } from "../components/ui/form/Form";
 import { Header } from "../components/layout/Header";
@@ -7,7 +9,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "../components/ui/toast/Toast";
 
-interface SignupFormData {
+interface LocalSignupFormData {
   name: string;
   email: string;
   password: string;
@@ -15,61 +17,54 @@ interface SignupFormData {
 }
 
 const signupFields: Field[] = [
-  { name: "name", label: "Full Name", type: "text", required: true },
-  { name: "email", label: "Email Address", type: "email", required: true },
-  { name: "password", label: "Password", type: "password", required: true },
-  {
-    name: "confirmPassword",
-    label: "Confirm Password",
-    type: "password",
-    required: true,
-  },
+  { name: "name", label: "Full Name", type: "text" },
+  { name: "email", label: "Email Address", type: "email" },
+  { name: "password", label: "Password", type: "password" },
+  { name: "confirmPassword", label: "Confirm Password", type: "password" },
 ];
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (data: Record<string, string>) => {
-    const { name, email, password, confirmPassword } = data;
-
-    if (!name || !email || !password || !confirmPassword) {
-      toast.error("All fields are required.");
-      return;
-    }
-
+    const { name, email, password, confirmPassword } =
+      data as unknown as LocalSignupFormData;
     if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
       return;
     }
-
     try {
-      const payload: Omit<SignupFormData, "confirmPassword"> = {
-        name,
-        email,
-        password,
-      };
-
-      const response = await axios.post(
-        "http://localhost:8080/auth/register",
-        payload,
-      );
+      const payload = { name, email, password };
+      const response = await signupApi(payload);
       toast.success(
         response.data.message ||
           "User created successfully! Redirecting to login...",
-        {
-          autoClose: 2000,
-        },
+        { autoClose: 2000 },
       );
-
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (error) {
-      const err = error as AxiosError<{ message?: string }>;
+      const err = error as AxiosError<SignupErrorResponse>;
       if (err.response) {
-        toast.error(
-          `Signup failed: ${err.response.data?.message || err.response.statusText}`,
-        );
+        const errorsObj = err.response.data?.errors;
+        let shown = false;
+        if (errorsObj && typeof errorsObj === "object") {
+          Object.entries(errorsObj).forEach(([field, msg]) => {
+            if (typeof msg === "string" && msg.trim()) {
+              toast.error(
+                field === "error"
+                  ? msg
+                  : `${field.charAt(0).toUpperCase() + field.slice(1)}: ${msg}`,
+              );
+              shown = true;
+            }
+          });
+        }
+        if (!shown) {
+          const errorMsg = err.response.data?.message || "Signup failed";
+          toast.error(`Signup failed: ${errorMsg}`);
+        }
       } else {
         toast.error("An unexpected error occurred. Please try again.");
       }

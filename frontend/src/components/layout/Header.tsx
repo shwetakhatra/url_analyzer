@@ -28,7 +28,9 @@ export const Header: React.FC = () => {
   }, [isDark]);
 
   const toggleDarkMode = () => setIsDark((prev) => !prev);
-  const isDashboardOrDetail = location.pathname === "/dashboard" || location.pathname.startsWith("/detail");
+  const isDashboardOrDetail =
+    location.pathname === "/dashboard" ||
+    location.pathname.startsWith("/detail");
 
   const handleLogout = () => {
     localStorage.removeItem("token");
